@@ -1,0 +1,61 @@
+{
+  "builders": [
+    {
+      "type": "vmware-iso",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "headless": true,
+      "boot_wait": "2m",
+      "communicator": "winrm",
+      "winrm_username": "packer",
+      "winrm_password": "packer",
+      "winrm_timeout": "6h",
+      "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
+      "output_directory": "windows2012r2",
+      "guest_os_type": "windows8srv-64",
+      "tools_upload_flavor": "windows",
+      "disk_size": 61440,
+      "vnc_port_min": 5900,
+      "vnc_port_max": 5980,
+      "floppy_files": [
+        "{{user `autounattend`}}",
+        "./scripts/init.bat",
+        "./scripts/winrm.bat",
+        "./scripts/win-updates.ps1"
+      ],
+      "vmdk_name": "windows_server_2012_r2",
+      "vmx_data": {
+        "RemoteDisplay.vnc.enabled": "false",
+        "RemoteDisplay.vnc.port": "5900",
+        "memsize": "2048",
+        "numvcpus": "2",
+        "scsi0.virtualDev": "lsisas1068",
+        "ethernet0.networkName": "VM Network",
+        "ethernet0.startConnected": "TRUE"
+      },
+      "remote_type": "esx5",
+      "remote_host": "{{user `remote_host`}}",
+      "remote_datastore": "{{user `remote_datastore`}}",
+      "remote_username": "root",
+      "remote_password": "vmware1!"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "windows-shell",
+      "scripts": [
+        "scripts/vm-guest-tools.bat",
+        "scripts/enable-rdp.bat"
+      ]
+    }
+  ],
+  "variables": {
+    "iso_url": "./iso/9600.17050.WINBLUE_REFRESH.140317-1640_X64FRE_SERVER_EVAL_EN-US-IR3_SSS_X64FREE_EN-US_DV9.ISO",
+    "iso_checksum_type": "md5",
+    "iso_checksum": "5B5E08C490AD16B59B1D9FAB0DEF883A",
+    "remote_host": "",
+    "remote_datastore": "",
+    "autounattend": "./answer_files/2012_r2/Autounattend.xml"
+  }
+}
